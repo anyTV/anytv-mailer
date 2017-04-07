@@ -101,6 +101,8 @@ mailer.send_mail
 # Todo
 - [ ] Complete test cases
 - [ ] Use nodemailer-mock
+- [ ] Support file attachments
+- [ ] Support `cc`, `bcc` and `reply to`
 
 
 # Contributing
