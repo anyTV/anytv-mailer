@@ -121,6 +121,8 @@ npm start
 # Running test
 
 ```sh
+sudo npm i serve_me -g
+serve_me test/locales 8081
 npm test
 ```
 
