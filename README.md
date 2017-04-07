@@ -24,7 +24,7 @@ mailer.configure({
 
     smtp: {
         pretend: false,
-        sender: 'Freedom! <support@freedom.tm>',
+        sender: 'Mailer! <info@server.com>',
         host: '',
         port: 587,
         auth: {
@@ -34,10 +34,10 @@ mailer.configure({
     },
 
     i18n: {
-        languages_url: 'https://api-translations.freedom.tm/:project/latest/languages',
-        translations_url: 'https://api-translations.freedom.tm/:project/latest/translations?ext=json&lang=:lang',
-        default: 'en',
-        project: 'freedom_dashboard'
+        languages_url: 'https://translation.server.com/:project/latest/languages.json',
+        translations_url: 'https://translation.server.com/:project/latest/:lang.json',
+        project: 'project_name',
+        default: 'en'
     },
 
     templates_dir: 'directory/of/templates'
@@ -58,9 +58,9 @@ mailer.send_mail
         // string or object
         // object value will be used to call i18n.trans
         {
-            trans: 'monetization-suspended-email-subject',
+            trans: 'email-subject',
             data: {
-                channel_name: row.channel_name
+                name: row.name
             }
         }
     )
@@ -72,7 +72,7 @@ mailer.send_mail
     .derive_language(row.user_country, row.channel_country)
 
 
-    .template('monetization_suspended')
+    .template('my_template')
 
     .content({
         /**
