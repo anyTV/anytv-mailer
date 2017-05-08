@@ -40,7 +40,27 @@ mailer.configure({
         default: 'en'
     },
 
-    templates_dir: 'directory/of/templates'
+    templates_dir: 'directory/of/templates',
+    
+    /**
+    *  This is optional, include this only when you're going to use
+    *  .recommend_language
+    */
+    database: {
+        ytfreedom: {
+            host: 'localhost',
+            database: 'ytfreedom',
+            user: 'root',
+            password: ''
+        },
+        master: {
+            host: 'localhost',
+            database: 'master',
+            user: 'root',
+            password: ''
+
+        }
+    }
 });
 
 
@@ -86,6 +106,9 @@ mailer.send_mail
         our_mailing_address: { trans: 'our-mailing-address'},
         year: (new Date()).getFullYear()
     })
+    // optionally have the mailer guess the language appropriate for the recipient
+    .recommend_language()
+
 
 
     // .build() will just build the whole string plus metadata

@@ -17,6 +17,10 @@ export default class {
      */
     static configure (config) {
 
+        if (!config) {
+            throw new Error('configuration is missing');
+        }
+
         if (!config.smtp_relay) {
             throw new Error('smtp_relay config is missing');
         }
