@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import squel from 'squel';
 import mysql from 'anytv-node-mysql';
-import { supported_languages as languages } from './country_language_map.js';
+import languages from './country_language_map.js';
 
 export class Language {
 
