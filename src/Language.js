@@ -1,18 +1,20 @@
 'use strict';
 
+import _ from 'lodash';
 import squel from 'squel';
 import mysql from 'anytv-node-mysql';
-import _ from 'lodash';
-import supported_languages from './country_language_map.js';
+import { supported_languages as languages } from './country_language_map.js';
 
 export class Language {
 
     constructor (database) {
-        mysql.add('ytfreedom', database.ytfreedom)
-        .add('master', database.master);
+        this._ytfreedom_db = database.ytfreedom;
+        this._master_db = database.master;
     }
 
     recommend_language (recipient) {
+        const self = this;
+
         return new Promise((resolve, reject) => {
             let username;
             let user_id;
@@ -32,7 +34,7 @@ export class Language {
                     .limit(1);
 
                 mysql
-                    .use('ytfreedom')
+                    .use(self._ytfreedom_db)
                     .squel(query, check_user_information)
                     .end();
             }
@@ -42,7 +44,7 @@ export class Language {
                     return reject(error);
                 }
 
-                if (!user_row) {
+                if (!user_row.length) {
                     return reject('User not found');
                 }
 
@@ -51,23 +53,22 @@ export class Language {
                 username = user_row.username;
                 user_id = user_row.id;
 
-                const language_shorthands_map = _.map(
-                    supported_languages,
-                    v => v.language
+                let match = _.find(
+                    languages,
+                    v => v.language === user_row.lang
                 );
 
-                if (language_shorthands_map.indexOf(user_row.lang) > -1) {
-                    return resolve(user_row.lang);
+                if (match) {
+                    return resolve(match.language);
                 }
 
-                const language_keys = Object.keys(supported_languages);
+                match = _.find(
+                    languages,
+                    v => _.values(v.countries).indexOf(user_row.country) > -1
+                );
 
-                for (const key of language_keys) {
-                    const countries = _.values(supported_languages[key].countries);
-
-                    if (countries.indexOf(user_row.country) > -1) {
-                        return resolve(supported_languages[key].language);
-                    }
+                if (match) {
+                    return resolve(match.language);
                 }
 
                 const query = squel.select()
@@ -85,35 +86,33 @@ export class Language {
                     .limit(1);
 
                 mysql
-                    .use('master')
+                    .use(self._master_db)
                     .squel(query, check_channel_information)
                     .end();
             }
 
-            function check_channel_information (error, result) {
+            function check_channel_information (error, channel_row) {
                 if (error) {
                     return reject(error);
                 }
 
-                if (!result) {
+                if (!channel_row.length) {
                     return reject('User not found');
                 }
 
-                result = result[0];
+                channel_row = channel_row[0];
 
-                const languages = supported_languages;
-                const language_keys = Object.keys(languages);
+                const match = _.find(
+                    languages,
+                    v => v.countries[channel_row.location]
+                );
 
-                for (const key of language_keys) {
-                    const countries = languages[key].countries;
-
-                    if (countries[result.location]) {
-                        return resolve(languages[key].language);
-                    }
+                if (match) {
+                    return resolve(match.language);
                 }
 
-                if (language_keys.indexOf(result.written_language) > -1) {
-                    return resolve(languages[result.written_language].language);
+                if (languages[channel_row.written_language]) {
+                    return resolve(languages[channel_row.written_language].language);
                 }
 
                 return reject();

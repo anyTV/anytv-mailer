@@ -5,8 +5,7 @@ import i18n from 'anytv-i18n';
 import _ from 'lodash';
 import { Language } from './Language.js';
 import country_language_map from './country_language_map.js';
-
-
+import * as logger from 'winston';
 
 export default class Mailer {
 
@@ -113,6 +112,8 @@ export default class Mailer {
 
 
     build (next) {
+        const self = this;
+
         let mail_content_translation = () => {
             // process translation if it's an object
             this._subject = this._trans(this ._subject);
@@ -179,7 +180,12 @@ export default class Mailer {
             (new Language(this.config.database))
                 .recommend_language(this._recommend_for)
                 .then(this.language)
-                .catch(() => this.language('en'))
+                .catch(() => {
+                    logger.warn(
+                        'Cannot find language to recommend.',
+                        'Using: ', self._language
+                    );
+                })
                 .then(generate_mail);
         } else {
             generate_mail();
@@ -213,21 +219,15 @@ export default class Mailer {
 
     recommend_language (identifier) {
         if (!_.has(this.config, 'database.ytfreedom')) {
-            console.log('Missing ytfreedom database configuration');
-
-            return this;
+            throw new Error('Missing ytfreedom database configuration');
         }
 
         if (!_.has(this.config, 'database.master')) {
-            console.log('Missing master database configuration');
-
-            return this;
+            throw new Error('Missing master database configuration');
         }
 
         if (this._built) {
-            console.log('Mail was already built. Doing nothing');
-
-            return this;
+            throw new Error('Mail was already built. Doing nothing');
         }
 
         if (!this._to) {
@@ -235,9 +235,7 @@ export default class Mailer {
         }
 
         if (_.isArray(this._to) && this._to.length > 1) {
-            console.log('Defaulting to english because there are more than 1 recipient', JSON.stringify(this._to));
-
-            return this.language('en');
+            return this.language(this.config.i18n.default);
         }
 
         this._need_recommendation = true;
