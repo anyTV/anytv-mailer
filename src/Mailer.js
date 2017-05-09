@@ -4,7 +4,7 @@ import { EmailTemplate as Template } from 'email-templates';
 import i18n from 'anytv-i18n';
 import _ from 'lodash';
 import { Language } from './Language.js';
-import country_language_map from './country_language_map.js';
+import country_language_map from './config/country_language_map.js';
 import * as logger from 'winston';
 
 export default class Mailer {
