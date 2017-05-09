@@ -1,11 +1,11 @@
 'use strict';
 
 import { EmailTemplate as Template } from 'email-templates';
-import country_language_map from './country_language_map';
 import i18n from 'anytv-i18n';
 import _ from 'lodash';
-
-
+import { Language } from './Language.js';
+import country_language_map from './config/country_language_map.js';
+import * as logger from 'winston';
 
 export default class Mailer {
 
@@ -112,6 +112,49 @@ export default class Mailer {
 
 
     build (next) {
+        const self = this;
+
+        let mail_content_translation = () => {
+            // process translation if it's an object
+            this._subject = this._trans(this ._subject);
+
+            // process content
+            if (this._content) {
+                this._content = _.mapValues(this._content, this._trans);
+            }
+        };
+
+        let render = () => {
+            // create Template object
+            const template = new Template(
+                this.config.templates_dir + this._template);
+
+            template.render(this._content, (err, result) => {
+
+                if (err) {
+                    return next(
+                        'Error in rendering template: ' + JSON.stringify(err));
+                }
+
+                this._html = result.html;
+
+                this._opts = {
+                    to: this._to,
+                    from: this._from,
+                    subject: this._subject,
+                    html: this._html
+                };
+
+                this._built = true;
+
+                next();
+            });
+        };
+
+        let generate_mail = () => {
+            mail_content_translation();
+            render();
+        };
 
         if (!this._to) {
             return next('Email does not have a recipient. Call mailer.to()');
@@ -133,38 +176,20 @@ export default class Mailer {
             return next();
         }
 
-
-        // process translation if it's an object
-        this._subject = this._trans(this._subject);
-
-        // process content
-        if (this._content) {
-            this._content = _.mapValues(this._content, this._trans);
+        if (this._need_recommendation) {
+            (new Language(this.config.database))
+                .recommend_language(this._recommend_for)
+                .then(this.language)
+                .catch(() => {
+                    logger.warn(
+                        'Cannot find language to recommend.',
+                        'Using: ', self._language
+                    );
+                })
+                .then(generate_mail);
+        } else {
+            generate_mail();
         }
-
-
-        // create Template object
-        const template = new Template(this.config.templates_dir + this._template);
-
-        template.render(this._content, (err, result) => {
-
-            if (err) {
-                return next('Error in rendering template: ' + JSON.stringify(err));
-            }
-
-            this._html = result.html;
-
-            this._opts = {
-                to: this._to,
-                from: this._from,
-                subject: this._subject,
-                html: this._html
-            };
-
-            this._built = true;
-
-            next();
-        });
     }
 
 
@@ -190,5 +215,32 @@ export default class Mailer {
         }
 
         this.build(send);
+    }
+
+    recommend_language (identifier) {
+        if (!_.has(this.config, 'database.ytfreedom')) {
+            throw new Error('Missing ytfreedom database configuration');
+        }
+
+        if (!_.has(this.config, 'database.master')) {
+            throw new Error('Missing master database configuration');
+        }
+
+        if (this._built) {
+            throw new Error('Mail was already built. Doing nothing');
+        }
+
+        if (!this._to) {
+            throw new Error('Recipients has not been set');
+        }
+
+        if (_.isArray(this._to) && this._to.length > 1) {
+            return this.language(this.config.i18n.default);
+        }
+
+        this._need_recommendation = true;
+        this._recommend_for = identifier || this._to;
+
+        return this;
     }
 }
