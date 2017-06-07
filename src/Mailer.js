@@ -41,7 +41,7 @@ export default class Mailer extends templater.Templater {
     }
 
 
-    // @@overload
+    // @@override
     _render (next) {
 
         super._render((err) => {
@@ -63,7 +63,7 @@ export default class Mailer extends templater.Templater {
     }
 
 
-    // @@overload
+    // @@override
     _translate_content () {
 
         super._translate_content();
@@ -75,7 +75,7 @@ export default class Mailer extends templater.Templater {
     }
 
 
-    // @@overload
+    // @@override
     build (next) {
 
         if (!this._to) {
