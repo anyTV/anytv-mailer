@@ -1,39 +1,19 @@
 'use strict';
 
-import { EmailTemplate as Template } from 'email-templates';
-import i18n from 'anytv-i18n';
-import _ from 'lodash';
-import { Language } from './Language.js';
-import country_language_map from './config/country_language_map.js';
-import * as logger from 'winston';
+import templater from 'anytv-templater';
 
-export default class Mailer {
+
+export default class Mailer extends templater.Templater {
 
     constructor (config) {
 
-        this.config = config;
+        super(config);
 
         this._to = void 0;
-        this._html = void 0;
         this._opts = void 0;
         this._subject = void 0;
-        this._content = void 0;
-        this._template = void 0;
-
-        this._built = false;
 
         this._from = config.smtp_relay.sender;
-        this._language = config.i18n.default;
-
-        this._trans = this._trans.bind(this);
-    }
-
-
-    _trans (param) {
-
-        return typeof param === 'object'
-            ? i18n.trans(this._language, param.trans, param.data)
-            : param;
     }
 
 
@@ -61,82 +41,12 @@ export default class Mailer {
     }
 
 
-    language (lang) {
-        this._language = lang || this._language;
-        return this;
-    }
+    // @@override
+    _render (next) {
 
+        super._render((err) => {
 
-    /**
-     * gets the language code given 1 or more country or country code
-     * returns the default language if not found
-     *
-     * @example:
-     *      // where one of these countries can be null
-     *      mailer.derive_language(user_country, channel_country, signup_country)
-     */
-    derive_language (...keys) {
-
-        const find = key =>
-            language_group =>
-                _.includes(language_group.countries, key)
-                || language_group.countries[key];
-
-        // used a native for loop to make the loop end
-        // as soon as a match is found
-        for (let i = 0; i < keys.length; i += 1) {
-
-            const key = keys[i];
-
-            const match = _.filter(country_language_map, find(key));
-
-            if (match.length) {
-                this._language = match[0].language;
-                break;
-            }
-        }
-
-        return this;
-    }
-
-
-    template (tpl) {
-        this._template = tpl;
-        return this;
-    }
-
-    content (_content) {
-        this._content = _content;
-        return this;
-    }
-
-
-    build (next) {
-        const self = this;
-
-        let mail_content_translation = () => {
-            // process translation if it's an object
-            this._subject = this._trans(this ._subject);
-
-            // process content
-            if (this._content) {
-                this._content = _.mapValues(this._content, this._trans);
-            }
-        };
-
-        let render = () => {
-            // create Template object
-            const template = new Template(
-                this.config.templates_dir + this._template);
-
-            template.render(this._content, (err, result) => {
-
-                if (err) {
-                    return next(
-                        'Error in rendering template: ' + JSON.stringify(err));
-                }
-
-                this._html = result.html;
+            if (!err) {
 
                 this._opts = {
                     to: this._to,
@@ -144,17 +54,29 @@ export default class Mailer {
                     subject: this._subject,
                     html: this._html
                 };
+            }
 
-                this._built = true;
+            next(err);
+        });
 
-                next();
-            });
-        };
+        return this;
+    }
 
-        let generate_mail = () => {
-            mail_content_translation();
-            render();
-        };
+
+    // @@override
+    _translate_content () {
+
+        super._translate_content();
+
+        // process translation if it's an object
+        this._subject = this._trans(this ._subject);
+
+        return this;
+    }
+
+
+    // @@override
+    build (next) {
 
         if (!this._to) {
             return next('Email does not have a recipient. Call mailer.to()');
@@ -168,28 +90,7 @@ export default class Mailer {
             return next('Email does not have a subject. Call mailer.subject()');
         }
 
-        if (!this._template) {
-            return next('Email does not have a template. Call mailer.template()');
-        }
-
-        if (this._built) {
-            return next();
-        }
-
-        if (this._need_recommendation) {
-            (new Language(this.config.database))
-                .recommend_language(this._recommend_for)
-                .then(this.language)
-                .catch(() => {
-                    logger.warn(
-                        'Cannot find language to recommend.',
-                        'Using: ', self._language
-                    );
-                })
-                .then(generate_mail);
-        } else {
-            generate_mail();
-        }
+        super.build(next);
     }
 
 
@@ -217,30 +118,4 @@ export default class Mailer {
         this.build(send);
     }
 
-    recommend_language (identifier) {
-        if (!_.has(this.config, 'database.ytfreedom')) {
-            throw new Error('Missing ytfreedom database configuration');
-        }
-
-        if (!_.has(this.config, 'database.master')) {
-            throw new Error('Missing master database configuration');
-        }
-
-        if (this._built) {
-            throw new Error('Mail was already built. Doing nothing');
-        }
-
-        if (!this._to) {
-            throw new Error('Recipients has not been set');
-        }
-
-        if (_.isArray(this._to) && this._to.length > 1) {
-            return this.language(this.config.i18n.default);
-        }
-
-        this._need_recommendation = true;
-        this._recommend_for = identifier || this._to;
-
-        return this;
-    }
 }

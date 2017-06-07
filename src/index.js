@@ -1,8 +1,8 @@
 'use strict';
 
+import templater from 'anytv-templater';
 import nodemailer from 'nodemailer';
 import Mailer from './Mailer';
-import i18n from 'anytv-i18n';
 
 
 let CONFIG;
@@ -25,28 +25,13 @@ export default class {
             throw new Error('smtp_relay config is missing');
         }
 
-        if (!config.templates_dir) {
-            throw new Error('templates directory is missing');
-        }
-
-        if (!config.i18n) {
-            throw new Error('i18n config is missing');
-        }
-
-        // make it end in trailing slash
-        if (config.templates_dir.substr(-1) !== '/') {
-            config.templates_dir += '/';
-        }
-
         config.transporter = nodemailer.createTransport({
             host: config.smtp_relay.host,
             port: config.smtp_relay.port,
             auth: config.smtp_relay.auth
         });
 
-        i18n.configure(config.i18n)
-            .use(config.i18n.project)
-            .load();
+        templater.configure(config);
 
         CONFIG = config;
 
@@ -61,5 +46,10 @@ export default class {
         }
 
         return new Mailer(CONFIG);
+    }
+
+
+    static get Mailer () {
+        return Mailer;
     }
 }
