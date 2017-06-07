@@ -4,14 +4,9 @@
   "description": "A module for mailing",
   "main": "index.js",
   "dependencies": {
-    "anytv-i18n": "^1.0.1",
-    "anytv-node-mysql": "0.0.52",
     "anytv-templater": "0.0.0",
-    "ejs": "^2.5.6",
-    "email-templates": "^2.5.4",
     "lodash": "^4.17.4",
-    "nodemailer": "^3.1.8",
-    "squel": "^5.9.1"
+    "nodemailer": "^3.1.8"
   },
   "devDependencies": {
     "esdoc": "^0.5.2",
