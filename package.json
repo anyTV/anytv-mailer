@@ -1,10 +1,10 @@
 {
   "name": "anytv-mailer",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "A module for mailing",
   "main": "index.js",
   "dependencies": {
-    "anytv-templater": "0.0.0",
+    "anytv-templater": "^1.0.0",
     "lodash": "^4.17.4",
     "nodemailer": "^3.1.8"
   },
