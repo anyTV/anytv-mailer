@@ -17,6 +17,7 @@ Simple example:
 
 
 const mailer = require('anytv-mailer');
+const i18n = requier('anytv-i18n');
 
 
 // on server.js
@@ -33,15 +34,10 @@ mailer.configure({
         }
     },
 
-    i18n: {
-        languages_url: 'https://translation.server.com/:project/latest/languages.json',
-        translations_url: 'https://translation.server.com/:project/latest/:lang.json',
-        project: 'project_name',
-        default: 'en'
-    },
+    i18n: i18n,
 
     templates_dir: 'directory/of/templates',
-    
+
     /**
     *  This is optional, include this only when you're going to use
     *  .recommend_language
