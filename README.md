@@ -23,7 +23,7 @@ const i18n = requier('anytv-i18n');
 // on server.js
 mailer.configure({
 
-    smtp: {
+    smtp_relay: {
         pretend: false,
         sender: 'Mailer! <info@server.com>',
         host: '',
@@ -67,7 +67,7 @@ mailer.send_mail
     // csv of email address or array
     .to(row.email)
 
-    // omit to use smtp.sender
+    // omit to use smtp_relay.sender
     .from('something@freedom.tm')
 
     .subject(
