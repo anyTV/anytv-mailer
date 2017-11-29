@@ -14,6 +14,14 @@ export default class Mailer extends templater.Templater {
         this._subject = void 0;
 
         this._from = config.smtp_relay.sender;
+
+        this._logger = config.logger || console;
+    }
+
+
+    set_logger(logger) {
+        this._logger = logger;
+        return this;
     }
 
 
@@ -103,7 +111,11 @@ export default class Mailer extends templater.Templater {
             }
 
             if (this.config.smtp_relay.pretend) {
-                return next();
+                this._logger.debug(`pretending to send email to ${this._to}`);
+                return next(null, {
+                    accepted: this._to.split(','),
+                    pretend: true
+                });
             }
 
             this.config

@@ -22,3 +22,7 @@ test.js
 _locales/*.json
 
 /index.js
+
+package-lock.json
+
+.idea
