@@ -113,7 +113,7 @@ export default class Mailer extends templater.Templater {
 
             if (this.config.smtp_relay.pretend) {
 
-                (this._logger.info || this._logger.debug)(`pretending to send email to ${this._to}`, this._html);
+                (this._logger.debug || this._logger.info)(`pretending to send email to ${this._to}`, this._html);
 
                 return next(null, {
                     accepted: this._to.split(','),
