@@ -17,7 +17,8 @@ Simple example:
 
 
 const mailer = require('anytv-mailer');
-const i18n = requier('anytv-i18n');
+const i18n = require('anytv-i18n');
+const logger = require('./helpers/logger');
 
 
 // on server.js
@@ -105,7 +106,11 @@ mailer.send_mail
     // optionally have the mailer guess the language appropriate for the recipient
     .recommend_language()
 
-
+    /**
+     * Optionally, set a custom logger.
+     * By default, winston is used.
+     */
+    .set_logger(logger)
 
     // .build() will just build the whole string plus metadata
 
