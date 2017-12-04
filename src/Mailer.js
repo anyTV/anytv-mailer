@@ -1,11 +1,12 @@
 'use strict';
 
 import templater from 'anytv-templater';
+import logger from './lib/logger';
 
 
 export default class Mailer extends templater.Templater {
 
-    constructor (config) {
+    constructor(config) {
 
         super(config);
 
@@ -15,17 +16,17 @@ export default class Mailer extends templater.Templater {
 
         this._from = config.smtp_relay.sender;
 
-        this._logger = config.logger || console;
+        this._logger = config.logger || logger;
     }
 
 
-    set_logger(logger) {
-        this._logger = logger;
+    set_logger(custom_logger) {
+        this._logger = custom_logger;
         return this;
     }
 
 
-    to (emails) {
+    to(emails) {
 
         if (typeof emails === 'string') {
             emails = emails.split(',');
@@ -37,20 +38,20 @@ export default class Mailer extends templater.Templater {
     }
 
 
-    from (sender) {
+    from(sender) {
         this._from = sender || this._from;
         return this;
     }
 
 
-    subject (subj) {
+    subject(subj) {
         this._subject = subj;
         return this;
     }
 
 
     // @@override
-    _render (next) {
+    _render(next) {
 
         super._render((err) => {
 
@@ -72,19 +73,19 @@ export default class Mailer extends templater.Templater {
 
 
     // @@override
-    _translate_content () {
+    _translate_content() {
 
         super._translate_content();
 
         // process translation if it's an object
-        this._subject = this._trans(this ._subject);
+        this._subject = this._trans(this._subject);
 
         return this;
     }
 
 
     // @@override
-    build (next) {
+    build(next) {
 
         if (!this._to) {
             return next('Email does not have a recipient. Call mailer.to()');
@@ -102,7 +103,7 @@ export default class Mailer extends templater.Templater {
     }
 
 
-    then (next) {
+    then(next) {
 
         const send = (err, result) => {
 
@@ -111,7 +112,9 @@ export default class Mailer extends templater.Templater {
             }
 
             if (this.config.smtp_relay.pretend) {
-                this._logger.debug(`pretending to send email to ${this._to}`);
+
+                (this._logger.info || this._logger.debug)(`pretending to send email to ${this._to}`, this._html);
+
                 return next(null, {
                     accepted: this._to.split(','),
                     pretend: true
