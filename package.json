@@ -4,7 +4,7 @@
   "description": "A module for mailing",
   "main": "index.js",
   "dependencies": {
-    "anytv-templater": "^1.2.1",
+    "anytv-templater": "^1.2.2",
     "lodash": "^4.17.4",
     "moment": "^2.19.3",
     "nodemailer": "^3.1.8",
