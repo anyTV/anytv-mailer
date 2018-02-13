@@ -10,3 +10,7 @@ v1.0.3
 -----
 - Added logging, when pretend is set to `true`
 - Upgraded `anytv-templater` package to 1.2.1
+
+v1.0.4
+-----
+- Upgraded `anytv-templater` package to 1.2.2
