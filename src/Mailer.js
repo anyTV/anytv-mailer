@@ -49,6 +49,10 @@ export default class Mailer extends templater.Templater {
         return this;
     }
 
+    attachments(attachments) {
+        this._attachments = attachments;
+        return this;
+    }
 
     // @@override
     _render(next) {
@@ -61,7 +65,8 @@ export default class Mailer extends templater.Templater {
                     to: this._to,
                     from: this._from,
                     subject: this._subject,
-                    html: this._html
+                    html: this._html,
+                    attachments: this._attachments
                 };
             }
 
