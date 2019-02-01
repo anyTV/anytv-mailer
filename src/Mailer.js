@@ -1,4 +1,4 @@
-'use strict';
+
 
 import templater from 'anytv-templater';
 import logger from './lib/logger';
@@ -22,6 +22,7 @@ export default class Mailer extends templater.Templater {
 
     set_logger(custom_logger) {
         this._logger = custom_logger;
+
         return this;
     }
 
@@ -40,12 +41,14 @@ export default class Mailer extends templater.Templater {
 
     from(sender) {
         this._from = sender || this._from;
+
         return this;
     }
 
 
     subject(subj) {
         this._subject = subj;
+
         return this;
     }
 

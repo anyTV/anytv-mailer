@@ -1,4 +1,4 @@
-'use strict';
+
 
 import templater from 'anytv-templater';
 import nodemailer from 'nodemailer';
