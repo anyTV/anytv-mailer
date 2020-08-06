@@ -68,6 +68,12 @@ mailer.send_mail
     // csv of email address or array
     .to(row.email)
 
+    // optional
+    .cc(row.cc)
+
+    // optional
+    .bcc(row.bcc)
+
     // omit to use smtp_relay.sender
     .from('something@freedom.tm')
 
@@ -126,7 +132,7 @@ mailer.send_mail
 - [ ] Complete test cases
 - [ ] Use nodemailer-mock
 - [ ] Support file attachments
-- [ ] Support `cc`, `bcc` and `reply to`
+- [ ] Support `reply to`
 
 
 # Contributing

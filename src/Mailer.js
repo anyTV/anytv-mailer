@@ -11,6 +11,8 @@ export default class Mailer extends templater.Templater {
         super(config);
 
         this._to = void 0;
+        this._cc = void 0;
+        this._bcc = void 0;
         this._opts = void 0;
         this._subject = void 0;
 
@@ -28,12 +30,19 @@ export default class Mailer extends templater.Templater {
 
 
     to(emails) {
+        this._to = this._parse_email(emails);
 
-        if (typeof emails === 'string') {
-            emails = emails.split(',');
-        }
+        return this;
+    }
 
-        this._to = emails.join(',');
+    cc(emails) {
+        this._cc = this._parse_email(emails);
+
+        return this;
+    }
+
+    bcc(emails) {
+        this._bcc = this._parse_email(emails);
 
         return this;
     }
@@ -62,6 +71,8 @@ export default class Mailer extends templater.Templater {
 
                 this._opts = {
                     to: this._to,
+                    cc: this._cc,
+                    bcc: this._bcc,
                     from: this._from,
                     subject: this._subject,
                     html: this._html
@@ -86,6 +97,13 @@ export default class Mailer extends templater.Templater {
         return this;
     }
 
+    _parse_email(emails) {
+        if (typeof emails === 'string') {
+            emails = emails.split(',');
+        }
+
+        return emails.join(',');
+    }
 
     // @@override
     build(next) {
