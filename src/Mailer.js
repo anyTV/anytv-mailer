@@ -108,7 +108,7 @@ export default class Mailer extends templater.Templater {
     // @@override
     build(next) {
 
-        if (!this._to) {
+        if (!this._to && !this.cc && !this.bcc) {
             return next('Email does not have a recipient. Call mailer.to()');
         }
 
