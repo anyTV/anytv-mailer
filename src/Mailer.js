@@ -108,8 +108,8 @@ export default class Mailer extends templater.Templater {
     // @@override
     build(next) {
 
-        if (!this._to) {
-            return next('Email does not have a recipient. Call mailer.to()');
+        if (!this._to && !this._cc && !this._bcc) {
+            return next('Email does not have a recipient. Call mailer.to(), mailer.cc() and mailer.bcc()  ');
         }
 
         if (!this._from) {
@@ -134,10 +134,16 @@ export default class Mailer extends templater.Templater {
 
             if (this.config.smtp_relay.pretend) {
 
-                (this._logger.debug || this._logger.info)(`pretending to send email to ${this._to}`, this._html);
+                const pretend_emails = JSON.stringify({
+                    to: this._to,
+                    cc: this._cc,
+                    bcc: this._bcc
+                });
+
+                (this._logger.debug || this._logger.info)(`pretending to send email to ${pretend_emails}`, this._html);
 
                 return next(null, {
-                    accepted: this._to.split(','),
+                    accepted: pretend_emails,
                     pretend: true
                 });
             }
