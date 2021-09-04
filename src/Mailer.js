@@ -134,10 +134,14 @@ export default class Mailer extends templater.Templater {
 
             if (this.config.smtp_relay.pretend) {
 
-                (this._logger.debug || this._logger.info)(`pretending to send email to ${this._to}`, this._html);
+                const pretend_to_emails = this._to || [];
+                const pretend_bcc_emails = this._bcc || [];
+                const pretend_emails = pretend_bcc_emails.concat(pretend_to_emails);
+
+                (this._logger.debug || this._logger.info)(`pretending to send email to ${pretend_emails}`, this._html);
 
                 return next(null, {
-                    accepted: this._to.split(','),
+                    accepted: pretend_emails,
                     pretend: true
                 });
             }
