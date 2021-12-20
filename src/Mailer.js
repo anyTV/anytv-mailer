@@ -15,6 +15,7 @@ export default class Mailer extends templater.Templater {
         this._bcc = void 0;
         this._opts = void 0;
         this._subject = void 0;
+        this._attachments = void 0;
 
         this._from = config.smtp_relay.sender;
 
@@ -63,6 +64,7 @@ export default class Mailer extends templater.Templater {
 
     attachments(attachments) {
         this._attachments = attachments;
+
         return this;
     }
 
