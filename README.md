@@ -120,7 +120,8 @@ mailer.send_mail
 
     // .build() will just build the whole string plus metadata
 
-    // .attach(files) may not be implemented yet
+    // optional
+    .attach(files)
 
     // will call .build if not called then send
     .then();
@@ -131,7 +132,6 @@ mailer.send_mail
 # Todo
 - [ ] Complete test cases
 - [ ] Use nodemailer-mock
-- [ ] Support file attachments
 - [ ] Support `reply to`
 
 
